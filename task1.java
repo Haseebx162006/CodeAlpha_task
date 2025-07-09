@@ -20,6 +20,32 @@ public class task1 {
             System.out.println(student_name[i]+"     "+grade[i]);
         }
     }
+    public void show_highest_grade(int x, int[] grade){
+        int max=0;
+        for (int i = 0; i < x; i++) {
+            if (grade[i]>max) {
+                max=grade[i];
+            }
+        }
+        System.out.println("The highest grade is:"+max);
+    }
+    public void show_lowest_grade(int x, int[] grade){
+        int min=grade[0];
+        for (int i = 0; i < x; i++) {
+            if (grade[i]<min) {
+                min=grade[i];
+            }
+        }
+        System.out.println("The lowest grade is:"+min);
+    }
+    public void average_marks(int x, int[] grade){
+        float sum=0;
+        for (int i = 0; i < x; i++) {
+            sum+=grade[i];
+        }
+        float average= sum/x;
+        System.out.println("The average marks are:"+average);
+    }
     public static void main(String[] args) {
         Scanner sc= new Scanner(System.in);
         int x=0;
@@ -33,9 +59,12 @@ public class task1 {
             System.out.println("===================================");
             System.out.println("1.  Add Student Grade");
             System.out.println("2.  Show Summary Report");
-            System.out.println("3.  Exit");
+            System.out.println("3.  Show The average marks");
+            System.out.println("4.  Show The Highest marks");
+            System.out.println("5.  Show The lowest marks");
+            System.out.println("6.  Exit");
             System.out.println("-----------------------------------");
-            System.out.print("Enter your choice (1-3): ");
+            System.out.print("Enter your choice (1-6): ");
 
             choice = sc.nextInt();
             sc.nextLine();
@@ -49,12 +78,23 @@ public class task1 {
                    obj.show_student(x, student_name, grade);
                     break;
                 case 3:
-                   System.out.println("Exiting");
+                   obj.average_marks(x, grade);
+                    break;
+                    case 4:
+                    obj.show_highest_grade(x, grade);
+                    break;
+                    case 5:
+                    obj.show_lowest_grade(x, grade);
+                    break;
+                    case 6:
+                    System.out.println("Exiting the program......................");
                     break;
                 default:
+                System.out.println("Choose the right option");
+                
             }
 
-        } while (choice != 3);
+        } while (choice != 6);
         sc.close();
     }
 }

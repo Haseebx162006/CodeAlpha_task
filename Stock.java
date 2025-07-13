@@ -217,6 +217,112 @@ class portfolio extends read_from_file {
             System.out.println("Error displaying portfolio: " + e.getMessage());
         }
     }
+    public void sell() {
+    System.out.print("Enter the Stock ID you want to sell: ");
+    int sell_id = sy.nextInt();
+    System.out.print("Enter the quantity you want to sell: ");
+    int sell_quantity = sy.nextInt();
+
+    File portfolioFile = new File("original_updated_pfile.csv");
+    File tempPortfolio = new File("temp_portfolio.csv");
+    File marketFile = new File("stock_data.csv");
+    File tempMarket = new File("temp_market.csv");
+
+    boolean stockInPortfolio = false;
+    boolean marketUpdated = false;
+    String stockName = "";
+    double stockPrice = 0;
+
+    try {
+        // First update portfolio
+        Scanner pfReader = new Scanner(portfolioFile);
+        FileWriter pfWriter = new FileWriter(tempPortfolio);
+
+        while (pfReader.hasNextLine()) {
+            String line = pfReader.nextLine();
+            String[] data = line.split(",");
+
+            int id = Integer.parseInt(data[0].trim());
+            String name = data[1].trim();
+            double price = Double.parseDouble(data[2].trim());
+            double quantity = Double.parseDouble(data[3].trim());
+
+            if (id == sell_id) {
+                if (sell_quantity <= 0 || sell_quantity > quantity) {
+                    System.out.println("Invalid sell quantity. Transaction aborted.");
+                    pfWriter.write(line + "\n");
+                    pfReader.close();
+                    pfWriter.close();
+                    tempPortfolio.delete();
+                    return;
+                }
+
+                stockInPortfolio = true;
+                stockName = name;
+                stockPrice = price;
+
+                quantity -= sell_quantity;
+                if (quantity > 0)
+                    pfWriter.write(id + "," + name + "," + price + "," + quantity + "\n");
+                else
+                    System.out.println("All shares sold. Stock removed from portfolio.");
+            } else {
+                pfWriter.write(line + "\n");
+            }
+        }
+
+        pfReader.close();
+        pfWriter.close();
+
+        if (!stockInPortfolio) {
+            System.out.println("You don't own this stock.");
+            tempPortfolio.delete();
+            return;
+        }
+
+        // Update portfolio file
+        portfolioFile.delete();
+        tempPortfolio.renameTo(portfolioFile);
+
+        // Now update market
+        Scanner mReader = new Scanner(marketFile);
+        FileWriter mWriter = new FileWriter(tempMarket);
+
+        while (mReader.hasNextLine()) {
+            String line = mReader.nextLine();
+            String[] data = line.split(",");
+
+            int id = Integer.parseInt(data[0].trim());
+            String name = data[1].trim();
+            double price = Double.parseDouble(data[2].trim());
+            double quantity = Double.parseDouble(data[3].trim());
+
+            if (id == sell_id) {
+                quantity += sell_quantity;
+                marketUpdated = true;
+            }
+
+            mWriter.write(id + "," + name + "," + price + "," + quantity + "\n");
+        }
+
+        if (!marketUpdated) {
+            mWriter.write(sell_id + "," + stockName + "," + stockPrice + "," + sell_quantity + "\n");
+        }
+
+        mReader.close();
+        mWriter.close();
+
+        marketFile.delete();
+        tempMarket.renameTo(marketFile);
+
+        double totalSale = stockPrice * sell_quantity;
+        System.out.println("Sell successful! Amount received: " + totalSale);
+
+    } catch (Exception e) {
+        System.out.println("Error while selling: " + e.getMessage());
+    }
+}
+
 }
 
 public class Stock {
@@ -231,7 +337,8 @@ public class Stock {
             System.out.println("2. View Market Stocks");
             System.out.println("3. Buy Stock");
             System.out.println("4. View Portfolio");
-            System.out.println("5. Exit");
+            System.out.println("5. Sell Stock");
+System.out.println("6. Exit");
             System.out.print("Enter your choice: ");
             choice = sc.nextInt();
             sc.nextLine();
@@ -255,11 +362,13 @@ public class Stock {
                     port.display();
                     break;
                 case 5:
-                    System.out.println("Exiting... Thank you for using the platform!");
-                    break;
+                    port.sell();
+                  break;
+                  case 6:
+                  System.out.println("Exit"); 
                 default:
                     System.out.println("Invalid choice. Try again.");
             }
-        } while (choice != 5);
+        } while (choice != 6);
     }
 }
